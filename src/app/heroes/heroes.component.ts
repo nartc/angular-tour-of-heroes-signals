@@ -12,7 +12,7 @@ import { HeroService } from '../hero.service';
     templateUrl: './heroes.component.html',
     styleUrls: ['./heroes.component.css'],
 })
-export class HeroesComponent implements OnInit {
+export default class HeroesComponent implements OnInit {
     private readonly heroService = inject(HeroService);
 
     readonly heroes = signal<Hero[]>([]);

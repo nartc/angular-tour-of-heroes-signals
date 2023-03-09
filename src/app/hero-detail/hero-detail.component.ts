@@ -15,7 +15,7 @@ import { HeroService } from '../hero.service';
     templateUrl: './hero-detail.component.html',
     styleUrls: ['./hero-detail.component.css'],
 })
-export class HeroDetailComponent implements OnInit {
+export default class HeroDetailComponent implements OnInit {
     private readonly route = inject(ActivatedRoute);
     private readonly heroService = inject(HeroService);
     private readonly location = inject(Location);

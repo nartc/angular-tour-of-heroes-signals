@@ -12,7 +12,7 @@ import { HeroService } from '../hero.service';
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.css'],
 })
-export class DashboardComponent {
+export default class DashboardComponent {
     readonly heroes = fromAsync(inject(HeroService).getHeroes(), []);
     readonly topHeroes = computed(() => this.heroes().slice(1, 5));
 }

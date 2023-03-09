@@ -2,15 +2,12 @@ import { bootstrapApplication } from '@angular/platform-browser';
 import { provideRouter, Routes } from '@angular/router';
 
 import { AppComponent } from './app/app.component';
-import { DashboardComponent } from './app/dashboard/dashboard.component';
-import { HeroDetailComponent } from './app/hero-detail/hero-detail.component';
-import { HeroesComponent } from './app/heroes/heroes.component';
 
 const routes: Routes = [
     { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
-    { path: 'dashboard', component: DashboardComponent },
-    { path: 'detail/:id', component: HeroDetailComponent },
-    { path: 'heroes', component: HeroesComponent },
+    { path: 'dashboard', loadComponent: () => import('./app/dashboard/dashboard.component') },
+    { path: 'detail/:id', loadComponent: () => import('./app/hero-detail/hero-detail.component') },
+    { path: 'heroes', loadComponent: () => import('./app/heroes/heroes.component') },
 ];
 
 bootstrapApplication(AppComponent, {

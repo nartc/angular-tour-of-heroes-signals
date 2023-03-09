@@ -2,7 +2,7 @@ import { Location, NgIf, UpperCasePipe } from '@angular/common';
 import { Component, effect, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { map } from 'rxjs';
+import { map, switchMap } from 'rxjs';
 import { fromAsync } from '../from-observable';
 import { Hero } from '../hero';
 
@@ -20,17 +20,20 @@ export default class HeroDetailComponent implements OnInit {
     private readonly heroService = inject(HeroService);
     private readonly location = inject(Location);
 
-    readonly id = fromAsync(this.route.paramMap.pipe(map((paramMap) => Number(paramMap.get('id')))));
+    private readonly asyncHero = fromAsync(
+        this.route.paramMap.pipe(
+            map((paramMap) => Number(paramMap.get('id'))),
+            switchMap((id) => this.heroService.getHero(id))
+        ),
+        null
+    );
     readonly hero = signal<Hero>(null!);
 
-    ngOnInit(): void {
-        effect(async () => {
-            const id = this.id();
-            console.log('id', id);
-            if (id) {
-                const hero = await this.heroService.getHero(id);
-                this.hero.set(hero);
-            }
+    ngOnInit() {
+        // is effect() bad?
+        effect(() => {
+            const hero = this.asyncHero();
+            if (hero) this.hero.set(hero);
         });
     }
 
@@ -43,9 +46,7 @@ export default class HeroDetailComponent implements OnInit {
     }
 
     async save() {
-        if (this.hero()) {
-            await this.heroService.updateHero(this.hero());
-            this.goBack();
-        }
+        await this.heroService.updateHero(this.hero());
+        this.goBack();
     }
 }

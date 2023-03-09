@@ -3,7 +3,7 @@ import { Component, effect, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { map } from 'rxjs';
-import { fromObservable } from '../from-observable';
+import { fromAsync } from '../from-observable';
 import { Hero } from '../hero';
 
 import { HeroService } from '../hero.service';
@@ -20,7 +20,7 @@ export class HeroDetailComponent implements OnInit {
     private readonly heroService = inject(HeroService);
     private readonly location = inject(Location);
 
-    readonly id = fromObservable(this.route.paramMap.pipe(map((paramMap) => Number(paramMap.get('id')))));
+    readonly id = fromAsync(this.route.paramMap.pipe(map((paramMap) => Number(paramMap.get('id')))));
     readonly hero = signal<Hero>(null!);
 
     ngOnInit(): void {

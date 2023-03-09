@@ -7,7 +7,7 @@
  */
 
 import { computed, DestroyRef, inject, signal, Signal } from '@angular/core';
-import { Observable } from 'rxjs';
+import { from, isObservable, Observable } from 'rxjs';
 
 /**
  * Get the current value of an `Observable` as a reactive `Signal`.
@@ -21,7 +21,8 @@ import { Observable } from 'rxjs';
  * an error. To avoid this, use a synchronous `Observable` (potentially created with the `startWith`
  * operator) or pass an initial value to `fromObservable` as the second argument.
  */
-export function fromObservable<T>(obs$: Observable<T>): Signal<T>;
+export function fromAsync<T>(obs$: Observable<T>): Signal<T>;
+export function fromAsync<T>(prom: Promise<T>): Signal<T>;
 
 /**
  * Get the current value of an `Observable` as a reactive `Signal`.
@@ -37,8 +38,9 @@ export function fromObservable<T>(obs$: Observable<T>): Signal<T>;
  *
  * @developerPreview
  */
-export function fromObservable<T, U>(source: Observable<T>, initialValue: U): Signal<T | U>;
-export function fromObservable<T, U = never>(source: Observable<T>, initialValue?: U): Signal<T | U> {
+export function fromAsync<T, U>(source: Observable<T>, initialValue: U): Signal<T | U>;
+export function fromAsync<T, U>(prom: Promise<T>, initialValue: U): Signal<T | U>;
+export function fromAsync<T, U = never>(source: Observable<T> | Promise<T>, initialValue?: U): Signal<T | U> {
     let initialState: State<T | U>;
     if (initialValue === undefined && arguments.length !== 2) {
         initialState = { kind: StateKind.NoValue };
@@ -48,7 +50,9 @@ export function fromObservable<T, U = never>(source: Observable<T>, initialValue
 
     const state = signal<State<T | U>>(initialState);
 
-    const sub = source.subscribe({
+    const source$ = isObservable(source) ? source : from(source);
+
+    const sub = source$.subscribe({
         next: (value) => state.set({ kind: StateKind.Value, value }),
         error: (error) => state.set({ kind: StateKind.Error, error }),
     });

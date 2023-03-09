@@ -5,7 +5,7 @@ import { RouterLink } from '@angular/router';
 import { Subject } from 'rxjs';
 
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
-import { fromObservable } from '../from-observable';
+import { fromAsync } from '../from-observable';
 
 import { HeroService } from '../hero.service';
 
@@ -20,7 +20,7 @@ export class HeroSearchComponent {
     private readonly heroService = inject(HeroService);
 
     readonly searchTerms = new Subject<string>();
-    readonly heroes = fromObservable(
+    readonly heroes = fromAsync(
         this.searchTerms.pipe(
             // wait 300ms after each keystroke before considering the term
             debounceTime(300),

@@ -1,5 +1,5 @@
 import { NgFor, NgIf } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MessageService } from '../message.service';
 
 @Component({
@@ -10,5 +10,5 @@ import { MessageService } from '../message.service';
     styleUrls: ['./messages.component.css'],
 })
 export class MessagesComponent {
-    constructor(public messageService: MessageService) {}
+    readonly messageService = inject(MessageService);
 }

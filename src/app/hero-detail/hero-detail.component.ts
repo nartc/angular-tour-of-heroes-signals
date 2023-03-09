@@ -1,9 +1,11 @@
 import { Location, NgIf, UpperCasePipe } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, effect, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-
+import { map } from 'rxjs';
+import { fromObservable } from '../from-observable';
 import { Hero } from '../hero';
+
 import { HeroService } from '../hero.service';
 
 @Component({
@@ -14,26 +16,36 @@ import { HeroService } from '../hero.service';
     styleUrls: ['./hero-detail.component.css'],
 })
 export class HeroDetailComponent implements OnInit {
-    hero: Hero | undefined;
+    private readonly route = inject(ActivatedRoute);
+    private readonly heroService = inject(HeroService);
+    private readonly location = inject(Location);
 
-    constructor(private route: ActivatedRoute, private heroService: HeroService, private location: Location) {}
+    readonly id = fromObservable(this.route.paramMap.pipe(map((paramMap) => Number(paramMap.get('id')))));
+    readonly hero = signal<Hero>(null!);
 
     ngOnInit(): void {
-        this.getHero();
-    }
-
-    getHero(): void {
-        const id = parseInt(this.route.snapshot.paramMap.get('id')!, 10);
-        this.heroService.getHero(id).subscribe((hero) => (this.hero = hero));
+        effect(async () => {
+            const id = this.id();
+            console.log('id', id);
+            if (id) {
+                const hero = await this.heroService.getHero(id);
+                this.hero.set(hero);
+            }
+        });
     }
 
     goBack(): void {
         this.location.back();
     }
 
-    save(): void {
-        if (this.hero) {
-            this.heroService.updateHero(this.hero).subscribe(() => this.goBack());
+    onNameChange($event: string) {
+        this.hero.mutate((hero) => (hero.name = $event));
+    }
+
+    async save() {
+        if (this.hero()) {
+            await this.heroService.updateHero(this.hero());
+            this.goBack();
         }
     }
 }

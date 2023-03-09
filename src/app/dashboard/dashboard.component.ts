@@ -1,5 +1,5 @@
 import { NgFor } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Hero } from '../hero';
 import { HeroSearchComponent } from '../hero-search/hero-search.component';
@@ -13,15 +13,16 @@ import { HeroService } from '../hero.service';
     styleUrls: ['./dashboard.component.css'],
 })
 export class DashboardComponent implements OnInit {
-    heroes: Hero[] = [];
+    private readonly heroService = inject(HeroService);
 
-    constructor(private heroService: HeroService) {}
+    readonly heroes = signal<Hero[]>([]);
 
     ngOnInit(): void {
         this.getHeroes();
     }
 
-    getHeroes(): void {
-        this.heroService.getHeroes().subscribe((heroes) => (this.heroes = heroes.slice(1, 5)));
+    async getHeroes() {
+        const heroes = await this.heroService.getHeroes();
+        this.heroes.set(heroes.slice(1, 5));
     }
 }

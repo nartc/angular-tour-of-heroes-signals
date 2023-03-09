@@ -1,5 +1,5 @@
 import { NgFor } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { Hero } from '../hero';
@@ -13,30 +13,30 @@ import { HeroService } from '../hero.service';
     styleUrls: ['./heroes.component.css'],
 })
 export class HeroesComponent implements OnInit {
-    heroes: Hero[] = [];
+    private readonly heroService = inject(HeroService);
 
-    constructor(private heroService: HeroService) {}
+    readonly heroes = signal<Hero[]>([]);
 
-    ngOnInit(): void {
-        this.getHeroes();
+    async ngOnInit() {
+        await this.getHeroes();
     }
 
-    getHeroes(): void {
-        this.heroService.getHeroes().subscribe((heroes) => (this.heroes = heroes));
+    async getHeroes() {
+        const heroes = await this.heroService.getHeroes();
+        this.heroes.set(heroes);
     }
 
-    add(name: string): void {
+    async add(name: string) {
         name = name.trim();
         if (!name) {
             return;
         }
-        this.heroService.addHero({ name } as Hero).subscribe((hero) => {
-            this.heroes.push(hero);
-        });
+        const newHero = await this.heroService.addHero({ name } as Hero);
+        this.heroes.mutate((heroes) => heroes.push(newHero));
     }
 
-    delete(hero: Hero): void {
-        this.heroes = this.heroes.filter((h) => h !== hero);
-        this.heroService.deleteHero(hero.id).subscribe();
+    async delete(hero: Hero) {
+        this.heroes.update((heroes) => heroes.filter((h) => h.id !== hero.id));
+        await this.heroService.deleteHero(hero.id);
     }
 }

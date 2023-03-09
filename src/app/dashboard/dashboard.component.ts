@@ -6,27 +6,22 @@ import { HeroSearchComponent } from '../hero-search/hero-search.component';
 import { HeroService } from '../hero.service';
 
 @Component({
-  selector: 'app-dashboard',
-  standalone: true,
-  imports: [
-    NgFor,
-    RouterLink,
-    HeroSearchComponent
-  ],
-  templateUrl: './dashboard.component.html',
-  styleUrls: [ './dashboard.component.css' ]
+    selector: 'app-dashboard',
+    standalone: true,
+    imports: [NgFor, RouterLink, HeroSearchComponent],
+    templateUrl: './dashboard.component.html',
+    styleUrls: ['./dashboard.component.css'],
 })
 export class DashboardComponent implements OnInit {
-  heroes: Hero[] = [];
+    heroes: Hero[] = [];
 
-  constructor(private heroService: HeroService) { }
+    constructor(private heroService: HeroService) {}
 
-  ngOnInit(): void {
-    this.getHeroes();
-  }
+    ngOnInit(): void {
+        this.getHeroes();
+    }
 
-  getHeroes(): void {
-    this.heroService.getHeroes()
-      .subscribe(heroes => this.heroes = heroes.slice(1, 5));
-  }
+    getHeroes(): void {
+        this.heroService.getHeroes().subscribe((heroes) => (this.heroes = heroes.slice(1, 5)));
+    }
 }
